@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:ammentor/components/custom_text_field.dart';
 import 'package:ammentor/components/theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   final UserRole userRole;
@@ -37,6 +38,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     setState(() => isLoading = true);
 
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user_email', email);
     ref.read(userEmailProvider.notifier).state = email;
 
     final auth = AuthController();

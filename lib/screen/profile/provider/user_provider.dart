@@ -1,23 +1,20 @@
+import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 import '../models/user_profile.dart';
 
-// Toggle this to false once backend is ready
-const bool isMockMode = true;
+final userProvider = FutureProvider.family<UserProfile, String>((ref, email) async {
+  final baseUrl = dotenv.env['BACKEND_URL'];
+  final url = Uri.parse('$baseUrl/auth/user/$email');
 
-final userProvider = FutureProvider<UserProfile>((ref) async {
-  if (isMockMode) {
-    await Future.delayed(const Duration(milliseconds: 300)); 
-    return UserProfile(
-      name: 'Ganeswar',
-      email: 'gani@amfoss.dev',
-      role: 'Mentee @ amFOSS',
-      avatarUrl: 'https://example.com/avatar.jpg',
-      badges: ['1', '2', '3', '4'],
-      socialLinks: ['github', 'gitlab', 'email'],
-      points: 100,
-    );
+  final response = await http.get(url);
+
+  if (response.statusCode == 200) {
+    final json = jsonDecode(response.body);
+    return UserProfile.fromJson(json);
   } else {
-    // Replace with real API call
-    throw UnimplementedError('API not implemented');
+    throw Exception('Failed to load user profile');
   }
 });
